@@ -3,8 +3,7 @@ import numpy as np
 import sys
 
 def harris_corner(image_mat):
-    # input: np.array matrix of a .tif image
-    # returns: 
+    # input: gray matrix img
     # Harris-Corner Detection Parameters
     block_size = 5 # Indicates the size of the neighborhood used for corner detection.
     aperture_size = 3 # Usually, it should be 3,5,7
