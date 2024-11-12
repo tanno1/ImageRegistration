@@ -19,14 +19,10 @@ def match(img_gray, ref_gray, unreg_read_img, ref_read_img):
     #     if m.distance <0.7 * matches[-1].distance:
     #         good_matches.append(m)
     
-    print('matches:')
-    print(matches)
     # draw match result
     match_image = cv2.drawMatches(unreg_read_img, kp_img, ref_read_img, kp_ref, matches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-    print(match_image)
-    print(type(match_image))
 
-    return match_image
+    return match_image, kp_img, kp_ref, matches
 
 if __name__ == '__main__':
     match()
