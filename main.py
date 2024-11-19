@@ -6,17 +6,18 @@ import cv2
 import numpy as np
 from harris2 import harris_corner
 from match import match
-from hough import hough_transform, draw_lines
 from affinetransform import affine_transform
 import sys
 
-def main(unreg_image, ref_image):
-    # enable or disable subpixe;
-    subpixel = 1
+def main(unreg_image, ref_image, sp, show):
+    # enable or disable subpixel, 1 = yes, 0 = no subpixel
+    print(show)
+    subpixel = sp
 
     # open and read each image
     unreg = cv2.imread(unreg_image)
     ref = cv2.imread(ref_image)
+
     # convert images to grayscale
     gray_unreg = cv2.cvtColor(unreg, cv2.COLOR_BGR2GRAY)
     ref_unreg = cv2.cvtColor(ref, cv2.COLOR_BGR2GRAY)
@@ -25,6 +26,8 @@ def main(unreg_image, ref_image):
     unreg_read_image = cv2.imread(unreg_image)
     ref_read_image = cv2.imread(ref_image)
 
+    unreg_read_image_2 = cv2.imread(unreg_image)
+    ref_read_image_2 = cv2.imread(ref_image)
 
     # convert to grayscale
     unreg_gray_image = cv2.cvtColor(unreg_read_image, cv2.COLOR_BGR2GRAY)
@@ -37,10 +40,11 @@ def main(unreg_image, ref_image):
     unreg_read_image[unreg_dst > 0.05 * unreg_dst.max()] = [0, 0, 255]
     ref_dst = harris_corner(ref_gray_mat)
     ref_read_image[ref_dst > 0.05 * ref_dst.max()] = [0, 0, 255]
-    cv2.imshow('Harris Corner Unregistered Image', unreg_read_image)
-    cv2.imshow('Harris Corner Reference Image', ref_read_image)
-    if cv2.waitKey(0) & 0xff == 27:
-        cv2.destroyAllWindows()
+    if show == '1':
+        cv2.imshow('Harris Corner Unregistered Image', unreg_read_image)
+        cv2.imshow('Harris Corner Reference Image', ref_read_image)
+        if cv2.waitKey(0) & 0xff == 27:
+            cv2.destroyAllWindows()
 
     # subpixel accuracy
     ## comment out until line 69 if no subpixel
@@ -92,10 +96,11 @@ def main(unreg_image, ref_image):
         img_ref_sp[res_ref_sp[:,1],res_ref_sp[:,0]]=[0,0,255]
         img_ref_sp[res_ref_sp[:,3],res_ref_sp[:,2]] = [0,255,0]
 
-        cv2.imshow('Unregistered Subpixel Calulation',img_sp)
-        cv2.imshow('Reference Subpixel Calulation',img_ref_sp)
-        if cv2.waitKey(0) & 0xff == 27:
-            cv2.destroyAllWindows()
+        if show == '1':
+            cv2.imshow('Unregistered Subpixel Calulation',img_sp)
+            cv2.imshow('Reference Subpixel Calulation',img_ref_sp)
+            if cv2.waitKey(0) & 0xff == 27:
+                cv2.destroyAllWindows()
 
     # match corners
     matched_images, kp_img, kp_ref, matches = match(unreg_gray_image, ref_gray_image, unreg_read_image, ref_read_image)
@@ -103,22 +108,24 @@ def main(unreg_image, ref_image):
     if subpixel == 1:
         matched_images_sp, kp_img_sp, kp_ref_sp, matches_sp = match(unreg_gray_image, ref_gray_image, img_sp, img_ref_sp)
 
-    cv2.imshow('Corner Matching (Unregistered Left, Reference Right)', matched_images)
-    if subpixel == 1:
-        cv2.imshow(' Corner Matching(Unregistered Left, Reference Right) with subpixel enhancement', matched_images_sp)
-    if cv2.waitKey(0) & 0xff == 27:
-        cv2.destroyAllWindows()
+    if show == '1':
+        cv2.imshow('Corner Matching (Unregistered Left, Reference Right)', matched_images)
+        if subpixel == 1:
+            cv2.imshow(' Corner Matching(Unregistered Left, Reference Right) with subpixel enhancement', matched_images_sp)
+        if cv2.waitKey(0) & 0xff == 27:
+           cv2.destroyAllWindows()
 
     # affine transformation
-    img_aligned = affine_transform(matches, unreg_read_image, kp_img, kp_ref)
+    img_aligned = affine_transform(matches, unreg_read_image_2, kp_img, kp_ref)
     if subpixel == 1:
-        img_aligned_sp = affine_transform(matches_sp, unreg_read_image, kp_img_sp, kp_ref_sp)
+        img_aligned_sp = affine_transform(matches_sp, unreg_read_image_2, kp_img_sp, kp_ref_sp)
 
-    cv2.imshow('Aligned Image', img_aligned)
-    if subpixel == 1:
-        cv2.imshow('Alignment with subpixel accuracy', img_aligned_sp)
-    if cv2.waitKey(0) & 0xff == 27:
-        cv2.destroyAllWindows()
+    if show == '1':
+        cv2.imshow('Aligned Image', img_aligned)
+        if subpixel == 1:
+            cv2.imshow('Alignment with subpixel accuracy', img_aligned_sp)
+        if cv2.waitKey(0) & 0xff == 27:
+            cv2.destroyAllWindows()
 
     # error calcualtion
     reg_gray = cv2.cvtColor(img_aligned, cv2.COLOR_BGR2GRAY)
@@ -127,34 +134,28 @@ def main(unreg_image, ref_image):
         sp_reg_gray = cv2.cvtColor(img_aligned_sp, cv2.COLOR_BGR2GRAY)
         error_sp = cv2.absdiff(sp_reg_gray, ref_unreg)
         mean_error_sp = np.mean(error_sp)
-        print(f'Mean Error with Subpixel enhancement: {mean_error_sp}')
+        # print(f'Mean Error with Subpixel enhancement: {mean_error_sp}')
         error_enhanced_sp = cv2.normalize(error_sp, None, 0, 255, cv2.NORM_MINMAX)
     error_enhanced = cv2.normalize(error, None, 0, 255, cv2.NORM_MINMAX)
     mean_error = np.mean(error)
-    print(f'Mean Error: {mean_error}')
-    cv2.imshow('Error Image', error)
-    cv2.imshow('Enhanced Error Image', error_enhanced)
-    if subpixel == 1:
-        cv2.imshow('Enhanced Error Image with Subpixel Accuracy', error_enhanced_sp)
-    if cv2.waitKey(0) & 0xff == 27:
-        cv2.destroyAllWindows()
+    if show == '1':
+        # print(f'Mean Error: {mean_error}')
+        cv2.imshow('Error Image', error)
+        cv2.imshow('Enhanced Error Image', error_enhanced)
+        if subpixel == 1:
+            cv2.imshow('Enhanced Error Image with Subpixel Accuracy', error_enhanced_sp)
+        if cv2.waitKey(0) & 0xff == 27:
+            cv2.destroyAllWindows()
 
-    # # hough transform (implement later)
-    # hough_lines_img = hough_transform(ref_read_image)
-    # hough_lines_ref = hough_transform(ref_read_image)
-    # print(hough_lines_img)
-    # print(hough_lines_ref)
-
-    # # draw hough lines on imgs
-    # draw_lines(hough_lines_img, unreg_read_image)
-    # draw_lines(hough_lines_ref, ref_read_image)
-
-    # cv2.imshow('Hough lines unregistered img', unreg_read_image)
-    # cv2.imshow('Hough lines reference img', ref_read_image)
-    # if cv2.waitKey(0) & 0xff == 27:
-    #     cv2.destroyAllWindows()
+    # really hacky way to do this lol    
+    if subpixel ==1 :
+        return mean_error_sp, mean_error_sp, img_aligned, img_aligned_sp
     
+    mean_error_sp = 0
+    img_aligned_sp = 0
+    return mean_error, mean_error_sp, img_aligned, img_aligned_sp
 
 
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2])
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+    
