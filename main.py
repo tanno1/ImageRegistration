@@ -11,7 +11,7 @@ import sys
 
 def main(unreg_image, ref_image, sp, show):
     # enable or disable subpixel, 1 = yes, 0 = no subpixel
-    print(show)
+    # print(show)
     subpixel = sp
 
     # open and read each image

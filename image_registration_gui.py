@@ -120,7 +120,7 @@ def process():
             for root, _, files in os.walk(folder_path):
                 files_to_process = [file for file in files if not file.startswith('._')]
                 for file in files_to_process:
-                    print(f"Processing folder: {folder}")
+                    #print(f"Processing folder: {folder}")
                     if file.lower().endswith('.tif'):
                         tif_path = os.path.join(root, file)
 
