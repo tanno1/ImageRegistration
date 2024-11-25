@@ -6,6 +6,7 @@ import tkinter as tk
 import cv2
 from tkinter import filedialog
 from tkinter import messagebox
+from tkinter import ttk
 from ignores.tif2jpg import tif2jpg
 from main import main
 from blend import blend_images
@@ -58,6 +59,7 @@ def blend_reference():
     return blend_image_location
 
 def process():
+    print(f"processing with K: {K_var.get()}, BlockSize: {BlockSize_var.get()}, Aperture:{Aperature_var.get()}")
     # get subpixel var
     sp_enabled = sp_var.get()
     # get reference image location
@@ -126,7 +128,7 @@ def process():
 
                         # call main processing fn
                         # show = 1, show images, show = 0, no show images
-                        error, error_sp, img_aligned, img_aligned_sp = main(tif_path, ref, sp_enabled, show=0)
+                        error, error_sp, img_aligned, img_aligned_sp = main(tif_path, ref, sp_enabled, 0, K_var.get(), BlockSize_var.get(), Aperature_var.get())
 
                         # write image errors
                         with open(error_file_path, "a") as error_file:
@@ -149,48 +151,107 @@ def process():
 
     return
 
+def change_harris_settings():
+    for widget in harris_corner_widgets:
+        widget.config(state=tk.NORMAL)
+
+def apply_harris_settings():
+    k = K_var.get()
+    block_size = BlockSize_var.get()
+    aperature = Aperature_var.get()
+    print(f"Harris Parameters: K={k}, BlockSize={block_size}, Aperature={aperature}")
+
+
 # main gui
 app = tk.Tk()
 app.title('Image Registration App')
 
+# global variables
+harris_corner_settings = tk.BooleanVar()
+
+# notebook widget 
+notebook = ttk.Notebook(app)
+notebook.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+
+# tab1 main tab
+tab1 = ttk.Frame(notebook)
+notebook.add(tab1, text="Main")
+
+# tab2 harris corner tabs
+tab2 = ttk.Frame(notebook)
+notebook.add(tab2, text="Harris Corner Settings")
+
+harris_corner_widgets = []
+
+# tab3 affine transformation
+tab3 = ttk.Frame(notebook)
+notebook.add(tab3, text="Affine Transformation Settings")
+
 # reference image folder
 reference_folder_var = tk.StringVar()
-tk.Label(app, text="Reference Image Folder").grid(row=0, column=0, padx=10, pady=5, sticky=tk.W)
-tk.Entry(app, textvariable=reference_folder_var, width=30).grid(row=0, column=1, padx=10, pady=5)
-tk.Button(app, text="Browse", command=browse_reference).grid(row=0, column=2, padx=10, pady=5)
+tk.Label(tab1, text="Reference Image Folder").grid(row=0, column=0, padx=10, pady=5, sticky=tk.W)
+tk.Entry(tab1, textvariable=reference_folder_var, width=30).grid(row=0, column=1, padx=10, pady=5)
+tk.Button(tab1, text="Browse", command=browse_reference).grid(row=0, column=2, padx=10, pady=5)
 
 # reference image output
 reference_output_folder_var = tk.StringVar()
-tk.Label(app, text="Processed Reference Image Output Destination:").grid(row=1, column=0, padx=10, pady=5, sticky=tk.W)
-tk.Entry(app, textvariable=reference_output_folder_var, width=30).grid(row=1, column=1, padx=10, pady=5)
-tk.Button(app, text="Browse", command=browse_output_reference).grid(row=1, column=2, padx=10, pady=5)
+tk.Label(tab1, text="Processed Reference Image Output Destination:").grid(row=1, column=0, padx=10, pady=5, sticky=tk.W)
+tk.Entry(tab1, textvariable=reference_output_folder_var, width=30).grid(row=1, column=1, padx=10, pady=5)
+tk.Button(tab1, text="Browse", command=browse_output_reference).grid(row=1, column=2, padx=10, pady=5)
 
 # process reference button
-tk.Button(app, text="Process Reference Image", command=blend_reference).grid(row=2, column=1, pady=5)
+tk.Button(tab1, text="Process Reference Image", command=blend_reference).grid(row=2, column=1, pady=5)
 
 # input folder
 input_folder_var = tk.StringVar()
-tk.Label(app, text="Unregistered Images Folder:").grid(row=3, column=0, padx=10, pady=5, sticky=tk.W)
-tk.Entry(app, textvariable=input_folder_var, width=30).grid(row=3, column=1, padx=10, pady=5)
-tk.Button(app, text="Browse", command=browse_input).grid(row=3, column=2, padx=10, pady=5)
+tk.Label(tab1, text="Unregistered Images Folder:").grid(row=3, column=0, padx=10, pady=5, sticky=tk.W)
+tk.Entry(tab1, textvariable=input_folder_var, width=30).grid(row=3, column=1, padx=10, pady=5)
+tk.Button(tab1, text="Browse", command=browse_input).grid(row=3, column=2, padx=10, pady=5)
 
 # output folder
 output_folder_var = tk.StringVar()
-tk.Label(app, text="Output Destination:").grid(row=4, column=0, padx=10, pady=5, sticky=tk.W)
-tk.Entry(app, textvariable=output_folder_var, width=30).grid(row=4, column=1, padx=10, pady=5)
-tk.Button(app, text="Browse", command=browse_output).grid(row=4, column=2, padx=10, pady=5)
+tk.Label(tab1, text="Output Destination:").grid(row=4, column=0, padx=10, pady=5, sticky=tk.W)
+tk.Entry(tab1, textvariable=output_folder_var, width=30).grid(row=4, column=1, padx=10, pady=5)
+tk.Button(tab1, text="Browse", command=browse_output).grid(row=4, column=2, padx=10, pady=5)
 
 # single, processsed reference image
 reference_image_var = tk.StringVar()
-tk.Label(app, text="Blended, Reference Image:").grid(row=5, column=0, padx=10, pady=5, sticky=tk.W)
-tk.Entry(app, textvariable=reference_image_var, width=30).grid(row=5, column=1, padx=10, pady=5)
-tk.Button(app, text="Browse", command=browse_reference_blended).grid(row=5, column=2, padx=10, pady=5)
+tk.Label(tab1, text="Blended, Reference Image:").grid(row=5, column=0, padx=10, pady=5, sticky=tk.W)
+tk.Entry(tab1, textvariable=reference_image_var, width=30).grid(row=5, column=1, padx=10, pady=5)
+tk.Button(tab1, text="Browse", command=browse_reference_blended).grid(row=5, column=2, padx=10, pady=5)
 
 # subpixel setting
 sp_var = tk.BooleanVar()
-tk.Checkbutton(app, text="Enable Subpixel Registration", variable=sp_var).grid(row=6, column=1, pady=20)
+tk.Checkbutton(tab1, text="Enable Subpixel Registration", variable=sp_var).grid(row=6, column=1, pady=20)
 
 # go button
-tk.Button(app, text="Register Images", command=submit_paths).grid(row=7, column=1, pady=20)
+tk.Button(tab1, text="Register Images", command=submit_paths).grid(row=7, column=1, pady=20)
+
+# tab 2 stuff
+tk.Checkbutton(tab2, text="Change Default Harris Corner Settings", variable=harris_corner_settings, command=change_harris_settings).grid(row=0, column=1, pady=20)
+
+# settings variables, initailize to general variables
+K_var = tk.DoubleVar(value=.04)
+BlockSize_var = tk.IntVar(value=5)
+Aperature_var = tk.IntVar(value=3)
+
+# widgets for each setting
+tk.Label(tab2, text='K:').grid(row=1, column=0, padx=10, pady=5, sticky=tk.W)
+K_entry = tk.Entry(tab2, width=30,textvariable=K_var, state=tk.DISABLED)
+K_entry.grid(row=1,column=1, padx=10, pady=5)
+harris_corner_widgets.append(K_entry)
+
+tk.Label(tab2, text='Blocksize:').grid(row=2, column=0, padx=10, pady=5, sticky=tk.W)
+BlockSize_entry = tk.Entry(tab2,textvariable=BlockSize_var, width=30, state=tk.DISABLED)
+BlockSize_entry.grid(row=2, column=1, padx=10, pady=5)
+harris_corner_widgets.append(BlockSize_entry)
+
+tk.Label(tab2, text='Aperature:').grid(row=3, column=0, padx=10, pady=5, sticky=tk.W)
+Aperature_entry = tk.Entry(tab2, textvariable=Aperature_var,width=30, state=tk.DISABLED)
+Aperature_entry.grid(row=3, column=1, padx=10, pady=5)
+harris_corner_widgets.append(Aperature_entry)
+
+tk.Button(tab2, text="Save Harris Parameters", command=apply_harris_settings).grid(row=4, column=1, pady=5)
+
 
 app.mainloop()

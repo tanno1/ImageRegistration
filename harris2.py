@@ -2,13 +2,13 @@ import cv2
 import numpy as np
 import sys
 
-def harris_corner(image_mat):
+def harris_corner(image_mat, k, block, aperture):
     # input: gray matrix img
-    # Harris-Corner Detection Parameters
-    block_size = 5 # Indicates the size of the neighborhood used for corner detection.
-    aperture_size = 3 # Usually, it should be 3,5,7
-    k = 0.04 # Usually >0.04 and <0.06
-    dst = cv2.cornerHarris(image_mat, block_size, aperture_size, k)
+    # Harris-Corner Detection Parameters defaults
+    # block_size = 5 # Indicates the size of the neighborhood used for corner detection.
+    # aperture_size = 3 # Usually, it should be 3,5,7
+    # k = 0.04 # Usually >0.04 and <0.06
+    dst = cv2.cornerHarris(image_mat, block, aperture, k)
 
     # expand the size of the corner indicators
     # dst = cv2.dilate(dst, None)

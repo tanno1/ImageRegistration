@@ -9,7 +9,7 @@ from match import match
 from affinetransform import affine_transform
 import sys
 
-def main(unreg_image, ref_image, sp, show):
+def main(unreg_image, ref_image, sp, show, k, block, aperture):
     # enable or disable subpixel, 1 = yes, 0 = no subpixel
     # print(show)
     subpixel = sp
@@ -36,9 +36,9 @@ def main(unreg_image, ref_image, sp, show):
     ref_gray_mat = np.float32(ref_gray_image)
 
     # apply harris corner calculations
-    unreg_dst = harris_corner(unreg_gray_mat)
+    unreg_dst = harris_corner(unreg_gray_mat, k, block, aperture)
     unreg_read_image[unreg_dst > 0.05 * unreg_dst.max()] = [0, 0, 255]
-    ref_dst = harris_corner(ref_gray_mat)
+    ref_dst = harris_corner(ref_gray_mat, k, block, aperture)
     ref_read_image[ref_dst > 0.05 * ref_dst.max()] = [0, 0, 255]
     if show == '1':
         cv2.imshow('Harris Corner Unregistered Image', unreg_read_image)
