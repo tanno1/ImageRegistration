@@ -189,7 +189,7 @@ harris_corner_widgets = []
 
 # tab3 affine transformation
 tab3 = ttk.Frame(notebook)
-notebook.add(tab3, text="Affine Transformation Settings")
+notebook.add(tab3, text="Additional settings/Help")
 
 # reference image folder
 reference_folder_var = tk.StringVar()
@@ -257,8 +257,7 @@ harris_corner_widgets.append(Aperature_entry)
 
 tk.Button(tab2, text="Save Harris Parameters", command=apply_harris_settings).grid(row=4, column=1, pady=5)
 
-
-# Create the Label widget
+# harris corner link widget
 link_label = tk.Label(
     tab2, 
     text="Click to open documentation on Harris Corner", 
@@ -267,10 +266,41 @@ link_label = tk.Label(
     font=("Arial", 12, "underline")
 )
 
-# Bind the label to the click event
+# harris corner link
 link_label.bind("<Button-1>", lambda e: open_hyperlink("https://docs.opencv.org/4.x/dc/d0d/tutorial_py_features_harris.html"))
 
-# Place the label in the grid
+#  place harris corner link
 link_label.grid(row=5, column=1, padx=10, pady=5)
+
+# affine link
+link_label2 = tk.Label(
+    tab3, 
+    text="Click to open documentation on Affine transformation", 
+    fg="blue", 
+    cursor="hand2", 
+    font=("Arial", 12, "underline")
+)
+
+# harris corner link
+link_label2.bind("<Button-1>", lambda e: open_hyperlink("https://docs.opencv.org/4.x/d4/d61/tutorial_warp_affine.html"))
+
+#  place harris corner link
+link_label2.grid(row=1, column=1, padx=10, pady=5)
+
+####
+# github
+link_label3 = tk.Label(
+    tab3, 
+    text="Github Documentation", 
+    fg="blue", 
+    cursor="hand2", 
+    font=("Arial", 12, "underline")
+)
+
+# harris corner link
+link_label3.bind("<Button-1>", lambda e: open_hyperlink("https://github.com/tanno1/ImageRegistration"))
+
+#  place harris corner link
+link_label3.grid(row=2, column=1, padx=10, pady=5)
 
 app.mainloop()
