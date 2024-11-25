@@ -7,6 +7,7 @@ import cv2
 from tkinter import filedialog
 from tkinter import messagebox
 from tkinter import ttk
+import webbrowser
 from ignores.tif2jpg import tif2jpg
 from main import main
 from blend import blend_images
@@ -57,6 +58,9 @@ def blend_reference():
     messagebox.showinfo("Output Location", f"Blended image output to: {blend_image_location}")
 
     return blend_image_location
+
+def open_hyperlink(hyperlink):
+    webbrowser.open(hyperlink)
 
 def process():
     print(f"processing with K: {K_var.get()}, BlockSize: {BlockSize_var.get()}, Aperture:{Aperature_var.get()}")
@@ -253,5 +257,20 @@ harris_corner_widgets.append(Aperature_entry)
 
 tk.Button(tab2, text="Save Harris Parameters", command=apply_harris_settings).grid(row=4, column=1, pady=5)
 
+
+# Create the Label widget
+link_label = tk.Label(
+    tab2, 
+    text="Click to open documentation on Harris Corner", 
+    fg="blue", 
+    cursor="hand2", 
+    font=("Arial", 12, "underline")
+)
+
+# Bind the label to the click event
+link_label.bind("<Button-1>", lambda e: open_hyperlink("https://docs.opencv.org/4.x/dc/d0d/tutorial_py_features_harris.html"))
+
+# Place the label in the grid
+link_label.grid(row=5, column=1, padx=10, pady=5)
 
 app.mainloop()

@@ -54,7 +54,7 @@ def main(unreg_image, ref_image, sp, show, k, block, aperture):
 
         # find Harris corners
         gray_sp = np.float32(gray_sp)
-        dst_sp = cv2.cornerHarris(gray_sp,5,3,0.04)
+        dst_sp = cv2.cornerHarris(gray_sp,block,aperture,k)
         dst_sp = cv2.dilate(dst_sp,None)
         ret_sp, dst_sp = cv2.threshold(dst_sp,0.01*dst_sp.max(),255,0)
         dst_sp = np.uint8(dst_sp)
@@ -78,7 +78,7 @@ def main(unreg_image, ref_image, sp, show, k, block, aperture):
 
         # find Harris corners
         gray_ref__sp = np.float32(gray_ref_sp)
-        dst_ref_sp = cv2.cornerHarris(gray_ref_sp,5,3,0.04)
+        dst_ref_sp = cv2.cornerHarris(gray_ref_sp,block,aperture,k)
         dst_ref_sp = cv2.dilate(dst_ref_sp,None)
         ret_ref_sp, dst_ref_sp = cv2.threshold(dst_ref_sp,0.01*dst_ref_sp.max(),255,0)
         dst_ref_sp = np.uint8(dst_ref_sp)
