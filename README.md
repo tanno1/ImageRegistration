@@ -34,7 +34,7 @@ On Mac, this application can be ran by cloning the repository and then running t
 Currently only tested on Mac.
 
 # Contribution
-There are a lot of features that could be implemented. Message me if you would like to help: noahetanner@gmail.com
+There are a lot of features that could be implemented. See the Issues tab or message me if you would like to help: noahetanner@gmail.com
 
 # License
 MIT License
