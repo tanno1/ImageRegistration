@@ -1,0 +1,8 @@
+numpy
+cv2
+sys
+webbrowser
+os
+tkinter
+PIL
+tempfile
