@@ -231,6 +231,9 @@ tk.Checkbutton(tab1, text="Enable Subpixel Registration", variable=sp_var).grid(
 # go button
 tk.Button(tab1, text="Register Images", command=submit_paths).grid(row=7, column=1, pady=20)
 
+# version label
+tk.Label(tab1, text="Version 2.0 Tanner, Wei, 2024").grid(row=8, column=0, padx=10, pady=5, sticky=tk.W)
+
 # tab 2 stuff
 tk.Checkbutton(tab2, text="Change Default Harris Corner Settings", variable=harris_corner_settings, command=change_harris_settings).grid(row=0, column=1, pady=20)
 
@@ -297,10 +300,26 @@ link_label3 = tk.Label(
     font=("Arial", 12, "underline")
 )
 
+# create link
+link_label3.bind("<Button-1>", lambda e: open_hyperlink("https://github.com/tanno1/ImageRegistration"))
+
+#  github link place
+link_label3.grid(row=2, column=1, padx=10, pady=5)
+###
+# research paper
+link_label3 = tk.Label(
+    tab3, 
+    text="", 
+    fg="blue", 
+    cursor="hand2", 
+    font=("Arial", 12, "underline")
+)
+
 # harris corner link
 link_label3.bind("<Button-1>", lambda e: open_hyperlink("https://github.com/tanno1/ImageRegistration"))
 
-#  place harris corner link
+#  github link place
 link_label3.grid(row=2, column=1, padx=10, pady=5)
+
 
 app.mainloop()
