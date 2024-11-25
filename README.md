@@ -2,7 +2,7 @@
 # Jianya Wei, Noah Tanner
 # Fall 2024
 
-<img src="./images/header.jpg" alt="Header Image", width="500"/> 
+![Header Image](./images/header.jpg)
 
 ### Table of Contents
 1. [Purpose](#purpose)
