@@ -30,6 +30,14 @@ On Mac, this application can be ran by cloning the repository and then running t
     Run the GUI
     $ python3 image_registration_gui.py
 
+On Windows, run this in the Command Prompt or PowerShell:
+
+    Install dependencies: 
+    $ pip install -r requirements.txt
+
+    Run the GUI
+    $ python image_registration_gui.py
+
 # Usage
 Currently only tested on Mac.
 
