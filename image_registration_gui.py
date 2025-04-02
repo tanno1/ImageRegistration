@@ -53,8 +53,8 @@ def blend_reference():
     # check if both reference image folder and output have been selected
     reference_location = reference_folder_var.get()
     blended_output = reference_output_folder_var.get()
-    temp_dir = tif2jpg(reference_location)
-    blend_image_location = blend_images(temp_dir, blended_output, 'jpg')
+    #temp_dir = tif2jpg(reference_location)
+    blend_image_location = blend_images(reference_location, blended_output, 'tif')
     messagebox.showinfo("Output Location", f"Blended image output to: {blend_image_location}")
 
     return blend_image_location
@@ -126,13 +126,13 @@ def process():
             for root, _, files in os.walk(folder_path):
                 files_to_process = [file for file in files if not file.startswith('._')]
                 for file in files_to_process:
-                    #print(f"Processing folder: {folder}")
+                    print(f"Processing folder: {folder}")
                     if file.lower().endswith('.tif'):
                         tif_path = os.path.join(root, file)
 
                         # call main processing fn
                         # show = 1, show images, show = 0, no show images
-                        error, error_sp, img_aligned, img_aligned_sp = main(tif_path, ref, sp_enabled, 0, K_var.get(), BlockSize_var.get(), Aperature_var.get())
+                        error, error_sp, img_aligned, img_aligned_sp = main(tif_path, ref, sp_enabled, 1, K_var.get(), BlockSize_var.get(), Aperature_var.get())
 
                         # write image errors
                         with open(error_file_path, "a") as error_file:
@@ -144,7 +144,7 @@ def process():
                                 sp_error_file.write(f"Image: {file}, Error: {error_sp}\n")
                         
                         # save the aligned image (img_aligned) to output directory
-                        new_filename = f"aligned_{file[:-4]}.png"
+                        new_filename = f"aligned_{file[:-4]}.tif"
                         aligned_path = os.path.join(output_folder, new_filename)
                         cv2.imwrite(aligned_path, img_aligned)
 
