@@ -2,7 +2,7 @@
 # Jianya Wei, Noah Tanner
 # Fall 2024
 
-<img src="./images/header.jpg" alt="Header Image", width="500"/> 
+![Header Image](./images/header.jpg)
 
 ### Table of Contents
 1. [Purpose](#purpose)
@@ -30,11 +30,19 @@ On Mac, this application can be ran by cloning the repository and then running t
     Run the GUI
     $ python3 image_registration_gui.py
 
+On Windows, run this in the Command Prompt or PowerShell:
+
+    Install dependencies: 
+    $ pip install -r requirements.txt
+
+    Run the GUI
+    $ python image_registration_gui.py
+
 # Usage
 Currently only tested on Mac.
 
 # Contribution
-There are a lot of features that could be implemented. Message me if you would like to help: noahetanner@gmail.com
+There are a lot of features that could be implemented. See the Issues tab or message me if you would like to help: noahetanner@gmail.com
 
 # License
 MIT License
