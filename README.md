@@ -6,13 +6,18 @@
 
 ### Table of Contents
 1. [Purpose](#purpose)
-2. [Installation](#installation)
-3. [Usage](#usage)
-4. [Contribution](#contribution)
-5. [License](#license)
+2. [ChangeLog](#changeLog)
+3. [Installation](#installation)
+4. [Usage](#usage)
+5. [Contribution](#contribution)
+6. [License](#license)
 
 # Purpose
 In studying a Pressure & Temperature Sensitive Paint for the University of Washington's Quantitative Flow Visualization Laboratory, it was necessary to create an image registration tool to line up the pixels of test images that were to be processed into pressure distributions. To do so, a Research paper outlining an image warping method of image resgistration method written by Heider K. Ali was implemented. 
+
+# changeLog
+Fall 2024 - V2 Release
+4/23/25 - Added grayscale image handling, 16 bit depth handling as well (N. Tanner)
 
 The key features of this application are as follows:
 1. Input and ouput destination selection

@@ -8,7 +8,7 @@ from tkinter import filedialog
 from tkinter import messagebox
 from tkinter import ttk
 import webbrowser
-from ignores.tif2jpg import tif2jpg
+from tif2jpg import tif2jpg
 from main import main
 from blend import blend_images
 import os
@@ -232,7 +232,7 @@ tk.Checkbutton(tab1, text="Enable Subpixel Registration", variable=sp_var).grid(
 tk.Button(tab1, text="Register Images", command=submit_paths).grid(row=7, column=1, pady=20)
 
 # version label
-tk.Label(tab1, text="Tanner, Wei, 2024, Version 2.0").grid(row=8, column=0, padx=10, pady=5, sticky=tk.W)
+tk.Label(tab1, text="Tanner, Wei, 2024, Version 3.0").grid(row=8, column=0, padx=10, pady=5, sticky=tk.W)
 
 # tab 2 stuff
 tk.Checkbutton(tab2, text="Change Default Harris Corner Settings", variable=harris_corner_settings, command=change_harris_settings).grid(row=0, column=1, pady=20)

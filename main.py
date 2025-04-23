@@ -14,35 +14,38 @@ def main(unreg_image, ref_image, sp, show, k, block, aperture):
     # print(show)
     subpixel = sp
 
-    # open and read each image
-    unreg = cv2.imread(unreg_image)
-    ref = cv2.imread(ref_image)
+    # Open and read each image
+    unreg = cv2.imread(unreg_image, cv2.IMREAD_UNCHANGED)
+    ref = cv2.imread(ref_image, cv2.IMREAD_UNCHANGED)
 
-    # convert images to grayscale
-    gray_unreg = cv2.cvtColor(unreg, cv2.COLOR_BGR2GRAY)
-    ref_unreg = cv2.cvtColor(ref, cv2.COLOR_BGR2GRAY)
+    # Ensure images are single-channel grayscale
+    if len(unreg.shape) == 2:  # Already grayscale
+        gray_unreg = unreg.astype(np.uint8)  # Ensure correct dtype
+    else:  # Convert to grayscale
+        gray_unreg = cv2.cvtColor(unreg, cv2.COLOR_BGR2GRAY)
 
-    # read images
-    unreg_read_image = cv2.imread(unreg_image)
-    ref_read_image = cv2.imread(ref_image)
+    if len(ref.shape) == 2:  # Already grayscale
+        gray_ref = ref.astype(np.uint8)  # Ensure correct dtype
+    else:  # Convert to grayscale
+        gray_ref = cv2.cvtColor(ref, cv2.COLOR_BGR2GRAY)
 
-    unreg_read_image_2 = cv2.imread(unreg_image)
-    ref_read_image_2 = cv2.imread(ref_image)
+    # Use the grayscale images directly for further processing
+    unreg_gray_image = np.float32(gray_unreg)
+    ref_gray_image = np.float32(gray_ref)
 
-    # convert to grayscale
-    unreg_gray_image = cv2.cvtColor(unreg_read_image, cv2.COLOR_BGR2GRAY)
-    unreg_gray_mat = np.float32(unreg_gray_image)
-    ref_gray_image = cv2.cvtColor(ref_read_image, cv2.COLOR_BGR2GRAY)
-    ref_gray_mat = np.float32(ref_gray_image)
+    # Apply Harris corner calculations
+    unreg_dst = harris_corner(unreg_gray_image, k, block, aperture)
+    ref_dst = harris_corner(ref_gray_image, k, block, aperture)
 
-    # apply harris corner calculations
-    unreg_dst = harris_corner(unreg_gray_mat, k, block, aperture)
-    unreg_read_image[unreg_dst > 0.05 * unreg_dst.max()] = [0, 0, 255]
-    ref_dst = harris_corner(ref_gray_mat, k, block, aperture)
-    ref_read_image[ref_dst > 0.05 * ref_dst.max()] = [0, 0, 255]
+    # Highlight corners on the original images
+    if len(unreg.shape) == 3:  # If the original image is color
+        unreg[unreg_dst > 0.05 * unreg_dst.max()] = [0, 0, 255]
+    if len(ref.shape) == 3:  # If the original image is color
+        ref[ref_dst > 0.05 * ref_dst.max()] = [0, 0, 255]
+
     if show == '1':
-        cv2.imshow('Harris Corner Unregistered Image', unreg_read_image)
-        cv2.imshow('Harris Corner Reference Image', ref_read_image)
+        cv2.imshow('Harris Corner Unregistered Image', unreg)
+        cv2.imshow('Harris Corner Reference Image', ref)
         if cv2.waitKey(0) & 0xff == 27:
             cv2.destroyAllWindows()
 
@@ -103,7 +106,7 @@ def main(unreg_image, ref_image, sp, show, k, block, aperture):
                 cv2.destroyAllWindows()
 
     # match corners
-    matched_images, kp_img, kp_ref, matches = match(unreg_gray_image, ref_gray_image, unreg_read_image, ref_read_image)
+    matched_images, kp_img, kp_ref, matches = match(unreg_gray_image, ref_gray_image, unreg, ref)
 
     if subpixel == 1:
         matched_images_sp, kp_img_sp, kp_ref_sp, matches_sp = match(unreg_gray_image, ref_gray_image, img_sp, img_ref_sp)
@@ -116,9 +119,9 @@ def main(unreg_image, ref_image, sp, show, k, block, aperture):
            cv2.destroyAllWindows()
 
     # affine transformation
-    img_aligned = affine_transform(matches, unreg_read_image_2, kp_img, kp_ref)
+    img_aligned = affine_transform(matches, unreg, kp_img, kp_ref)
     if subpixel == 1:
-        img_aligned_sp = affine_transform(matches_sp, unreg_read_image_2, kp_img_sp, kp_ref_sp)
+        img_aligned_sp = affine_transform(matches_sp, unreg, kp_img_sp, kp_ref_sp)
 
     if show == '1':
         cv2.imshow('Aligned Image', img_aligned)
@@ -127,17 +130,35 @@ def main(unreg_image, ref_image, sp, show, k, block, aperture):
         if cv2.waitKey(0) & 0xff == 27:
             cv2.destroyAllWindows()
 
-    # error calcualtion
-    reg_gray = cv2.cvtColor(img_aligned, cv2.COLOR_BGR2GRAY)
-    error = cv2.absdiff(reg_gray, ref_unreg)
+    # Error calculation
+    if len(img_aligned.shape) == 2:  # Already grayscale
+        reg_gray = img_aligned
+    else:  # Convert to grayscale
+        reg_gray = cv2.cvtColor(img_aligned, cv2.COLOR_BGR2GRAY)
+
+    # Normalize images to the range [0, 1] before calculating the absolute difference
+    reg_gray = reg_gray / reg_gray.max() if reg_gray.max() > 1 else reg_gray
+    gray_ref = gray_ref / gray_ref.max() if gray_ref.max() > 1 else gray_ref
+
+    # Ensure both images have the same dtype
+    reg_gray = reg_gray.astype(np.float32)
+    gray_ref = gray_ref.astype(np.float32)
+
+    # Calculate the absolute difference
+    error = cv2.absdiff(reg_gray, gray_ref)
+
     if subpixel == 1:
-        sp_reg_gray = cv2.cvtColor(img_aligned_sp, cv2.COLOR_BGR2GRAY)
-        error_sp = cv2.absdiff(sp_reg_gray, ref_unreg)
+        sp_reg_gray = sp_reg_gray / sp_reg_gray.max() if sp_reg_gray.max() > 1 else sp_reg_gray
+        sp_reg_gray = sp_reg_gray.astype(np.float32)
+        gray_ref = gray_ref.astype(np.float32)  # Ensure consistency
+        error_sp = cv2.absdiff(sp_reg_gray, gray_ref)
         mean_error_sp = np.mean(error_sp)
-        # print(f'Mean Error with Subpixel enhancement: {mean_error_sp}')
         error_enhanced_sp = cv2.normalize(error_sp, None, 0, 255, cv2.NORM_MINMAX)
+
+    # Normalize and calculate mean error
     error_enhanced = cv2.normalize(error, None, 0, 255, cv2.NORM_MINMAX)
     mean_error = np.mean(error)
+
     if show == '1':
         # print(f'Mean Error: {mean_error}')
         cv2.imshow('Error Image', error)
@@ -158,4 +179,3 @@ def main(unreg_image, ref_image, sp, show, k, block, aperture):
 
 if __name__ == '__main__':
     main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
-    
