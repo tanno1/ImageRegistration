@@ -4,7 +4,7 @@
 import cv2
 import numpy as np
 
-def match(img_gray, ref_gray, unreg_read_img, ref_read_img):
+def match(img_gray, ref_gray, unreg_read_img, ref_read_img, max_matches=50):
     # Debugging: Check input image properties
     print(f"img_gray shape: {img_gray.shape}, dtype: {img_gray.dtype}")
     print(f"ref_gray shape: {ref_gray.shape}, dtype: {ref_gray.dtype}")
@@ -38,6 +38,9 @@ def match(img_gray, ref_gray, unreg_read_img, ref_read_img):
     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
     matches = bf.match(desc_img, desc_ref)
     matches = sorted(matches, key=lambda x: x.distance)
+
+    # Limit the number of matches
+    matches = matches[:max_matches]
 
     # Draw match result
     match_image = cv2.drawMatches(unreg_read_img, kp_img, ref_read_img, kp_ref, matches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)

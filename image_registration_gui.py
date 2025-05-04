@@ -11,6 +11,7 @@ import webbrowser
 from tif2jpg import tif2jpg
 from main import main
 from blend import blend_images
+from test_2_full import test_2_full, iterator
 import os
 
 # functions
@@ -121,7 +122,7 @@ def process():
             if sp_enabled:
                 with open(sp_error_file_path, "w") as sp_error_file:
                     sp_error_file.write(f"Subpixel errors for images in folder: {folder}\n")
-            
+
             # iterate through and get each image
             for root, _, files in os.walk(folder_path):
                 files_to_process = [file for file in files if not file.startswith('._')]
@@ -130,30 +131,39 @@ def process():
                     if file.lower().endswith('.tif'):
                         tif_path = os.path.join(root, file)
 
-                        # call main processing fn
-                        # show = 1, show images, show = 0, no show images
-                        error, error_sp, img_aligned, img_aligned_sp = main(tif_path, ref, sp_enabled, 1, K_var.get(), BlockSize_var.get(), Aperature_var.get())
+                        try:
+                            # call iterator to determine best k values
+                            k_opt, block_size_opt, aperture_opt = iterator(tif_path, ref, K_var.get(), BlockSize_var.get(), Aperature_var.get())
 
-                        # write image errors
-                        with open(error_file_path, "a") as error_file:
-                            error_file.write(f"Image: {file}, Error: {error}\n")
-                        
-                        # write sp image errors
-                        if sp_enabled:
-                            with open(sp_error_file_path, "a") as sp_error_file:
-                                sp_error_file.write(f"Image: {file}, Error: {error_sp}\n")
-                        
-                        # save the aligned image (img_aligned) to output directory
-                        new_filename = f"aligned_{file[:-4]}.tif"
-                        aligned_path = os.path.join(output_folder, new_filename)
-                        cv2.imwrite(aligned_path, img_aligned)
+                            print(f"Optimal parameters for {file}: K={k_opt}, BlockSize={block_size_opt}, Aperture={aperture_opt}")
 
-                        if sp_enabled:
-                            new_sp_filename = f"aligned_sp_{file[:-4]}.png"
-                            aligned_sp_path = os.path.join(output_sp_folder, new_sp_filename)
-                            cv2.imwrite(aligned_sp_path, img_aligned_sp)
+                            registered_uint16, abs_diff, percent_diff, matches = test_2_full(
+                                tif_path, ref, int(k_opt), int(block_size_opt), int(aperture_opt)
+                            )
 
-    return
+                            # check if registration looks bad
+                            if percent_diff > 5:
+                                print(f"Skipping {file}: registration quality too low (error: {percent_diff}%)")
+                                continue
+
+                            # write image errors
+                            with open(error_file_path, "a") as error_file:
+                                error_file.write(f"Image: {file}, Error: {percent_diff}\n")
+                            
+                            # save the aligned image
+                            new_filename = f"aligned_{file[:-4]}.tif"
+                            aligned_path = os.path.join(output_folder, new_filename)
+                            cv2.imwrite(aligned_path, registered_uint16)
+
+                            if sp_enabled:
+                                new_sp_filename = f"aligned_sp_{file[:-4]}.png"
+                                aligned_sp_path = os.path.join(output_sp_folder, new_sp_filename)
+                                cv2.imwrite(aligned_sp_path, img_aligned_sp)
+
+                        except Exception as e:
+                            print(f"Skipping {file}: failed with error: {e}")
+                            continue
+
 
 def change_harris_settings():
     for widget in harris_corner_widgets:

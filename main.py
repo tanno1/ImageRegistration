@@ -3,6 +3,7 @@
 # fall 2024
 
 import cv2
+import test_2_full
 import numpy as np
 from harris2 import harris_corner
 from match import match
@@ -39,9 +40,9 @@ def main(unreg_image, ref_image, sp, show, k, block, aperture):
 
     # Highlight corners on the original images
     if len(unreg.shape) == 3:  # If the original image is color
-        unreg[unreg_dst > 0.05 * unreg_dst.max()] = [0, 0, 255]
+        unreg[unreg_dst > .7 * unreg_dst.max()] = [0, 0, 255]
     if len(ref.shape) == 3:  # If the original image is color
-        ref[ref_dst > 0.05 * ref_dst.max()] = [0, 0, 255]
+        ref[ref_dst > 0.7 * ref_dst.max()] = [0, 0, 255]
 
     if show == '1':
         cv2.imshow('Harris Corner Unregistered Image', unreg)
@@ -148,9 +149,17 @@ def main(unreg_image, ref_image, sp, show, k, block, aperture):
     error = cv2.absdiff(reg_gray, gray_ref)
 
     if subpixel == 1:
+        # Ensure sp_reg_gray is initialized
+        if len(img_aligned_sp.shape) == 2:  # Already grayscale
+            sp_reg_gray = img_aligned_sp
+        else:  # Convert to grayscale
+            sp_reg_gray = cv2.cvtColor(img_aligned_sp, cv2.COLOR_BGR2GRAY)
+
+        # Normalize sp_reg_gray
         sp_reg_gray = sp_reg_gray / sp_reg_gray.max() if sp_reg_gray.max() > 1 else sp_reg_gray
         sp_reg_gray = sp_reg_gray.astype(np.float32)
-        gray_ref = gray_ref.astype(np.float32)  # Ensure consistency
+
+        # Calculate the absolute difference for subpixel
         error_sp = cv2.absdiff(sp_reg_gray, gray_ref)
         mean_error_sp = np.mean(error_sp)
         error_enhanced_sp = cv2.normalize(error_sp, None, 0, 255, cv2.NORM_MINMAX)
@@ -175,7 +184,6 @@ def main(unreg_image, ref_image, sp, show, k, block, aperture):
     mean_error_sp = 0
     img_aligned_sp = 0
     return mean_error, mean_error_sp, img_aligned, img_aligned_sp
-
 
 if __name__ == '__main__':
     main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
